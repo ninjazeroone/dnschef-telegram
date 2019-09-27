@@ -1,1 +1,3 @@
 *.log
+/venv/
+/.idea/

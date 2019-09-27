@@ -6,7 +6,7 @@
 # for the latest version and documentation. Please forward all issues and
 # concerns to iphelix [at] thesprawl.org.
 
-DNSCHEF_VERSION = "0.4"
+DNSCHEF_VERSION = "0.4.telegram"
 
 # Copyright (C) 2019 Peter Kacherginsky, Marcello Salvati
 # All rights reserved.
@@ -51,6 +51,20 @@ import os
 import binascii
 import string
 import base64
+import requests
+
+
+
+class TelegramHandler(logging.Handler):
+
+    botID = ""
+    channelID = ""
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        postData = {'chat_id': self.channelID, 'text': log_entry}
+        url = "https://api.telegram.org/bot" + self.botID + "/sendMessage"
+        return requests.post(url, data=postData)
 
 
 class DNSChefFormatter(logging.Formatter):
@@ -403,7 +417,7 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
         socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
 
 # Initialize and start the DNS Server
-def start_cooking(interface, nametodns, nameservers, tcp=False, ipv6=False, port="53", logfile=None):
+def start_cooking(interface, nametodns, nameservers, tcp=False, ipv6=False, port="53", logfile=None, telegram=None, telegramChannel=None):
     try:
 
         if logfile:
@@ -413,6 +427,20 @@ def start_cooking(interface, nametodns, nameservers, tcp=False, ipv6=False, port
             log.addHandler(fh)
 
             log.info("DNSChef is active.")
+
+        if telegram:
+            if telegramChannel:
+                TelegramHandler.botID = telegram
+                TelegramHandler.channelID = "-100" + telegramChannel
+                th = TelegramHandler()
+                th.setLevel(logging.INFO)
+                th.setFormatter(DNSChefFormatter(datefmt="%d/%b/%Y:%H:%M:%S %z"))
+                log.addHandler(th)
+                log.info("Telegram channel set")
+            else:
+                log.info("You must set a telegram channel to send the messages to with --telegramChannel")
+                sys.exit()
+
 
         if tcp:
             log.info("DNSChef is running in TCP mode")
@@ -467,6 +495,8 @@ if __name__ == "__main__":
 
     rungroup = parser.add_argument_group("Optional runtime parameters.")
     rungroup.add_argument("--logfile", metavar="FILE", help="Specify a log file to record all activity")
+    rungroup.add_argument("--telegram", metavar="token", help="Send all output not only to file or stdout, but also to the telegram bot, this option require bot token, you must also use \"--telegramChannel\"")
+    rungroup.add_argument("--telegramChannel", metavar="channelID", help="Telegram channel ID, required for telegram flag")
     rungroup.add_argument("--nameservers", metavar="8.8.8.8#53 or 4.2.2.1#53#tcp or 2001:4860:4860::8888", default='8.8.8.8', help='A comma separated list of alternative DNS servers to use with proxied requests. Nameservers can have either IP or IP#PORT format. A randomly selected server from the list will be used for proxy requests when provided with multiple servers. By default, the tool uses Google\'s public DNS server 8.8.8.8 when running in IPv4 mode and 2001:4860:4860::8888 when running in IPv6 mode.')
     rungroup.add_argument("-i","--interface", metavar="127.0.0.1 or ::1", default="127.0.0.1", help='Define an interface to use for the DNS listener. By default, the tool uses 127.0.0.1 for IPv4 mode and ::1 for IPv6 mode.')
     rungroup.add_argument("-t","--tcp", action="store_true", default=False, help="Use TCP DNS proxy instead of the default UDP.")
@@ -625,4 +655,4 @@ if __name__ == "__main__":
         log.info("No parameters were specified. Running in full proxy mode")
 
     # Launch DNSChef
-    start_cooking(interface=options.interface, nametodns=nametodns, nameservers=nameservers, tcp=options.tcp, ipv6=options.ipv6, port=options.port, logfile=options.logfile)
+    start_cooking(interface=options.interface, nametodns=nametodns, nameservers=nameservers, tcp=options.tcp, ipv6=options.ipv6, port=options.port, logfile=options.logfile, telegram=options.telegram, telegramChannel=options.telegramChannel)
