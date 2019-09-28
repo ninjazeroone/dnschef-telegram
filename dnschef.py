@@ -321,7 +321,7 @@ class DNSHandler():
 
         # HACK: It is important to search the nametodns dictionary before iterating it so that
         # global matching ['*.*.*.*.*.*.*.*.*.*'] will match last. Use sorting for that.
-        for domain,host in sorted(iter(nametodns.items()), key=operator.itemgetter(1)):
+        for domain,host in sorted(iter(nametodns.items()), key=operator.itemgetter(1), reverse=True):
 
             # NOTE: It is assumed that domain name was already lowercased
             #       when it was loaded through --file, --fakedomains or --truedomains
@@ -337,7 +337,10 @@ class DNSHandler():
                     break
             else:
                 # Could be a real IP or False if we are doing reverse matching with 'truedomains'
-                return host
+                if host == 'False':
+                    return False
+                else:
+                    return host
         else:
             return False
 
@@ -624,27 +627,27 @@ if __name__ == "__main__":
                 domain = domain.strip()
 
                 if fakeip:
-                    nametodns["A"][domain] = False
+                    nametodns["A"][domain] = 'False'
                     log.info(f"Cooking A replies to point to {options.fakeip} not matching: {domain}")
                     nametodns["A"]['*.*.*.*.*.*.*.*.*.*'] = fakeip
 
                 if fakeipv6:
-                    nametodns["AAAA"][domain] = False
+                    nametodns["AAAA"][domain] = 'False'
                     log.info(f"Cooking AAAA replies to point to {options.fakeipv6} not matching: {domain}")
                     nametodns["AAAA"]['*.*.*.*.*.*.*.*.*.*'] = fakeipv6
 
                 if fakemail:
-                    nametodns["MX"][domain] = False
+                    nametodns["MX"][domain] = 'False'
                     log.info(f"Cooking MX replies to point to {options.fakemail} not matching: {domain}")
                     nametodns["MX"]['*.*.*.*.*.*.*.*.*.*'] = fakemail
 
                 if fakealias:
-                    nametodns["CNAME"][domain] = False
+                    nametodns["CNAME"][domain] = 'False'
                     log.info(f"Cooking CNAME replies to point to {options.fakealias} not matching: {domain}")
                     nametodns["CNAME"]['*.*.*.*.*.*.*.*.*.*'] = fakealias
 
                 if fakens:
-                    nametodns["NS"][domain] = False
+                    nametodns["NS"][domain] = 'False'
                     log.info(f"Cooking NS replies to point to {options.fakens} not matching: {domain}")
                     nametodns["NS"]['*.*.*.*.*.*.*.*.*.*'] = fakealias
 
