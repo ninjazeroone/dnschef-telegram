@@ -9,7 +9,7 @@ Here you need to get the number between "c" and "_", this is your channel ID num
 
 Example of usage:
 
-```dnschef -i 0.0.0.0 --telegram="your bot ID" --telegramChannel="your channel ID"```
+```dnschef -i 0.0.0.0 --telegram="your bot token" --telegramChannel="your channel ID"```
 
 ### Other tweaks
 Flags --trueip and --trueipv6 added.
