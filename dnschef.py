@@ -54,7 +54,6 @@ import base64
 import requests
 
 
-
 class TelegramHandler(logging.Handler):
 
     botID = ""
@@ -69,8 +68,8 @@ class TelegramHandler(logging.Handler):
 class TelegramFormatter(logging.Formatter):
 
     FORMATS = {
-        logging.ERROR: "!!!❗️❗❗❗❕❕❗️❗️ %(msg)s",
-        logging.INFO: "📨 %(msg)s",
+        logging.ERROR: "\U00002757 %(msg)s",
+        logging.INFO: "\U0001F4E8 %(msg)s",
         logging.WARNING: "WARNING: %(msg)s",
         logging.DEBUG: "DBG: %(module)s: %(lineno)d: %(msg)s",
         "DEFAULT": "- %(msg)s"
