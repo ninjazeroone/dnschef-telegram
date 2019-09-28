@@ -509,7 +509,9 @@ if __name__ == "__main__":
 
     fakegroup = parser.add_argument_group("Fake DNS records:")
     fakegroup.add_argument('--fakeip', metavar="192.0.2.1", help='IP address to use for matching DNS queries. If you use this parameter without specifying domain names, then all \'A\' queries will be spoofed. Consider using --file argument if you need to define more than one IP address.')
+    fakegroup.add_argument('--trueip', metavar="192.0.2.1", help ='IP address to use with truedomains option. Every truedomain will resolve in this one if you want to')
     fakegroup.add_argument('--fakeipv6', metavar="2001:db8::1", help='IPv6 address to use for matching DNS queries. If you use this parameter without specifying domain names, then all \'AAAA\' queries will be spoofed. Consider using --file argument if you need to define more than one IPv6 address.')
+    fakegroup.add_argument('--trueipv6', metavar="2001:db8::1", help='IP address to use with truedomains option. Every truedomain will resolve in this one if you want to')
     fakegroup.add_argument('--fakemail', metavar="mail.fake.com", help='MX name to use for matching DNS queries. If you use this parameter without specifying domain names, then all \'MX\' queries will be spoofed. Consider using --file argument if you need to define more than one MX record.')
     fakegroup.add_argument('--fakealias', metavar="www.fake.com", help='CNAME name to use for matching DNS queries. If you use this parameter without specifying domain names, then all \'CNAME\' queries will be spoofed. Consider using --file argument if you need to define more than one CNAME record.')
     fakegroup.add_argument('--fakens', metavar="ns.fake.com", help='NS name to use for matching DNS queries. If you use this parameter without specifying domain names, then all \'NS\' queries will be spoofed. Consider using --file argument if you need to define more than one NS record.')
@@ -626,13 +628,24 @@ if __name__ == "__main__":
                 domain = domain.lower()
                 domain = domain.strip()
 
-                if fakeip:
+                if fakeip and not options.trueip:
                     nametodns["A"][domain] = 'False'
                     log.info(f"Cooking A replies to point to {options.fakeip} not matching: {domain}")
                     nametodns["A"]['*.*.*.*.*.*.*.*.*.*'] = fakeip
 
-                if fakeipv6:
+                if fakeip and options.trueip:
+                    nametodns["A"][domain] = options.trueip
+                    log.info(f"Cooking A replies to point to {options.fakeip} not matching: {domain}")
+                    nametodns["A"]['*.*.*.*.*.*.*.*.*.*'] = fakeip
+
+
+                if fakeipv6 and not options.trueipv6:
                     nametodns["AAAA"][domain] = 'False'
+                    log.info(f"Cooking AAAA replies to point to {options.fakeipv6} not matching: {domain}")
+                    nametodns["AAAA"]['*.*.*.*.*.*.*.*.*.*'] = fakeipv6
+
+                if fakeipv6 and options.trueipv6:
+                    nametodns["AAAA"][domain] = options.trueipv6
                     log.info(f"Cooking AAAA replies to point to {options.fakeipv6} not matching: {domain}")
                     nametodns["AAAA"]['*.*.*.*.*.*.*.*.*.*'] = fakeipv6
 
