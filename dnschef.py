@@ -52,6 +52,7 @@ import binascii
 import string
 import base64
 import requests
+import re
 
 
 class TelegramHandler(logging.Handler):
@@ -61,7 +62,11 @@ class TelegramHandler(logging.Handler):
 
     def emit(self, record):
         log_entry = self.format(record)
-        postData = {'chat_id': self.channelID, 'text': log_entry}
+        client_address = re.findall('(?:\d{1,3}\.){3}\d{1,3}', log_entry.split(":")[0])
+        if client_address != []:
+            client_address = client_address[0]
+            log_entry = log_entry.replace(client_address, "[" + client_address + "](https://ipinfo.io/" + client_address + ")")
+        postData = {'chat_id': self.channelID, 'text': log_entry, 'parse_mode': "Markdown", "disable_web_page_preview":"True"}
         url = "https://api.telegram.org/bot" + self.botID + "/sendMessage"
         return requests.post(url, data=postData)
 
