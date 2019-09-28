@@ -66,6 +66,25 @@ class TelegramHandler(logging.Handler):
         url = "https://api.telegram.org/bot" + self.botID + "/sendMessage"
         return requests.post(url, data=postData)
 
+class TelegramFormatter(logging.Formatter):
+
+    FORMATS = {
+        logging.ERROR: "!!!❗️❗❗❗❕❕❗️❗️ %(msg)s",
+        logging.INFO: "📨 %(msg)s",
+        logging.WARNING: "WARNING: %(msg)s",
+        logging.DEBUG: "DBG: %(module)s: %(lineno)d: %(msg)s",
+        "DEFAULT": "- %(msg)s"
+    }
+
+    def format(self, record):
+        format_orig = self._style._fmt
+
+        self._style._fmt = self.FORMATS.get(record.levelno, self.FORMATS['DEFAULT'])
+        result = logging.Formatter.format(self, record)
+
+        self._style._fmt = format_orig
+
+        return result
 
 class DNSChefFormatter(logging.Formatter):
 
@@ -434,7 +453,7 @@ def start_cooking(interface, nametodns, nameservers, tcp=False, ipv6=False, port
                 TelegramHandler.channelID = "-100" + telegramChannel
                 th = TelegramHandler()
                 th.setLevel(logging.INFO)
-                th.setFormatter(DNSChefFormatter(datefmt="%d/%b/%Y:%H:%M:%S %z"))
+                th.setFormatter(TelegramFormatter())
                 log.addHandler(th)
                 log.info("Telegram channel set")
             else:
