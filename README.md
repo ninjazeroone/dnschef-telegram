@@ -12,6 +12,8 @@ Example of usage:
 
 ```dnschef -i 0.0.0.0 --telegram="your bot token" --telegramChannel="your channel ID" --telegramString="c90ke1"```
 
+You can test this with digging c90ke1.yourdomain.com, the message should drop to your private channel.
+
 ### Other tweaks
 Flags --trueip and --trueipv6 added.
 So in case you want to use dnschef as a NS server for your domain, but doesn't want to resolve all the shit some bots in the internets want you to, you can do something like this:
