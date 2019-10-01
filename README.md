@@ -13,6 +13,7 @@ Example of usage:
 ```dnschef -i 0.0.0.0 --telegram="your bot token" --telegramChannel="your channel ID" --telegramString="c90ke1"```
 
 You can test this with digging c90ke1.yourdomain.com, the message should drop to your private channel.
+Every client's IP in the telegram message is an inline link to ipinfo.io.
 
 ### Other tweaks
 Flags --trueip and --trueipv6 added.
